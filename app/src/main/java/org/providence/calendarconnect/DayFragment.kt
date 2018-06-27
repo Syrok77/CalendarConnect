@@ -60,20 +60,23 @@ class DayFragment : Fragment() {
 
         while (cal.get(Calendar.HOUR_OF_DAY) < 20) {
 
-            cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+            cells.add(TimeCell(
+                sdf.format(cal.timeInMillis),
+                calendarEventsProvider.eventsFor(cal.timeInMillis, 20),
+                clicks))
             cal.timeInMillis += 20 * 60 * 1000
         }
-        // add 8pm slot
-        cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+        // Add 8pm slot
+        cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.eventsFor(cal.timeInMillis, 20), clicks))
 
         return cells
     }
 }
 
 class TimeCell(private val time: String,
-               private val isConflict: Boolean,
-               private val clicks: (View) -> Unit
-) : RecyclerCell() {
+               private val conflictEvents: List<CalendarEvent>,
+               private val clicks: (View) -> Unit) : RecyclerCell() {
+
     override fun createViewHolder(parent: ViewGroup, inflater: LayoutInflater): RecyclerView.ViewHolder {
         return TimeViewHolder(inflater.inflate(R.layout.calendar_row, parent, false))
     }
@@ -83,7 +86,7 @@ class TimeCell(private val time: String,
         timeHolder.time.text = time
         timeHolder.schedule.setOnClickListener(clicks)
 
-        val color = if (isConflict) {
+        val color = if (conflictEvents.isNotEmpty()) {
             ContextCompat.getColor(viewHolder.itemView.context, R.color.buttonConflict)
 
         } else {
@@ -91,7 +94,9 @@ class TimeCell(private val time: String,
         }
         timeHolder.schedule.backgroundTintList = ColorStateList.valueOf(color)
 
-        timeHolder.conflictMessage.visibility = if (isConflict) View.VISIBLE else View.GONE
+        if (conflictEvents.isNotEmpty()) {
+            timeHolder.conflictMessage.text = conflictEvents.map { it.title }.joinToString(", ")
+        }
     }
 
     class TimeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
