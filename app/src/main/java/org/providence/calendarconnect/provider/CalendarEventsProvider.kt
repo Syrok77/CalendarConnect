@@ -29,7 +29,7 @@ class CalendarEventsProvider constructor(private val context: Context) {
         return parseEvents(selection, selectionArgs)
     }
 
-    fun hasEventsFor(start:Long, duration: Long) = eventsFor(start,duration).size > 0
+    fun hasEventsFor(start:Long, duration: Long) = eventsFor(start, duration).isNotEmpty()
 
     @SuppressLint("MissingPermission")
     private fun parseEvents(selection: String, selectionArgs: Array<String>): List<CalendarEvent> {
