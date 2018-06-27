@@ -17,7 +17,6 @@ import android.widget.TextView
 import com.tomatron.RecyclerCell
 import com.tomatron.RecyclerCellAdapter
 import kotlinx.android.synthetic.main.day_fragment.recyclerView
-import org.providence.calendarconnect.R.id.recyclerView
 import org.providence.calendarconnect.provider.CalendarEvent
 import org.providence.calendarconnect.provider.CalendarEventsProvider
 import java.text.SimpleDateFormat
@@ -121,8 +120,10 @@ class TimeCell(private val time: Long,
         }
         timeHolder.schedule.backgroundTintList = ColorStateList.valueOf(color)
 
-        if (isConflict) {
-            timeHolder.conflictMessage.text = conflictEvents.map { it.title }.joinToString(", ")
+        timeHolder.conflictMessage.text = if (isConflict) {
+            conflictEvents.map { it.title }.joinToString(", ")
+        } else {
+            ""
         }
     }
 
