@@ -29,13 +29,38 @@ class DayFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
+        // Set up data set
+        adapter.cells = timeList()
+    }
+
+    private fun timeList(): List<TimeCell> {
         val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
 
-        // Set up data set
-        adapter.cells = listOf(
-            TimeCell("2:00 PM", false, clicks),
+        return listOf(
+            TimeCell("10:00 AM", false, clicks),
+            TimeCell("10:20 PM", false, clicks),
+            TimeCell("10:40 PM", true, clicks),
+            TimeCell("11:00 AM", false, clicks),
+            TimeCell("11:20 AM", false, clicks),
+            TimeCell("11:40 AM", false, clicks),
+            TimeCell("12:00 PM", false, clicks),
+            TimeCell("12:20 PM", false, clicks),
+            TimeCell("12:40 PM", false, clicks),
+            TimeCell("1:00 PM", true, clicks),
+            TimeCell("1:20 PM", true, clicks),
+            TimeCell("1:40 PM", true, clicks),
+            TimeCell("2:00 PM", true, clicks),
             TimeCell("2:20 PM", true, clicks),
-            TimeCell("2:40 PM", false, clicks)
+            TimeCell("2:40 PM", true, clicks),
+            TimeCell("3:00 PM", false, clicks),
+            TimeCell("3:20 PM", false, clicks),
+            TimeCell("3:40 PM", false, clicks),
+            TimeCell("4:00 PM", false, clicks),
+            TimeCell("4:20 PM", false, clicks),
+            TimeCell("4:40 PM", false, clicks),
+            TimeCell("5:00 PM", false, clicks),
+            TimeCell("5:20 PM", false, clicks),
+            TimeCell("5:40 PM", false, clicks)
         )
     }
 }
