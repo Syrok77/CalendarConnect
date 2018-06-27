@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -11,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import com.tomatron.RecyclerCell
 import com.tomatron.RecyclerCellAdapter
 import kotlinx.android.synthetic.main.day_fragment.recyclerView
@@ -46,7 +46,24 @@ class DayFragment : Fragment() {
     }
 
     private fun timeList(): List<TimeCell> {
-        val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
+        val clicks: (Boolean) -> Unit = { isConflict: Boolean ->
+            val activity = requireActivity() as CalendarActivity
+
+            if (isConflict) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("")
+                    .setMessage("This appointment conflicts with an event in your Calendar. Are you sure you want to schedule this appointment?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        activity.showConfirmation()
+                    }
+                    .setNegativeButton("Nevermind") { _, _ ->
+                        // TODO: change this to an "open calendar" option
+                    }
+                    .show()
+            } else {
+                activity.showConfirmation()
+            }
+        }
 
         return listOf(
             TimeCell("10:00 AM", false, clicks),
@@ -76,7 +93,7 @@ class DayFragment : Fragment() {
 
 class TimeCell(private val time: String,
                private val isConflict: Boolean,
-               private val clicks: (View) -> Unit
+               private val clicks: (Boolean) -> Unit
 ) : RecyclerCell() {
     override fun createViewHolder(parent: ViewGroup, inflater: LayoutInflater): RecyclerView.ViewHolder {
         return TimeViewHolder(inflater.inflate(R.layout.calendar_row, parent, false))
@@ -85,7 +102,7 @@ class TimeCell(private val time: String,
     override fun bindTo(viewHolder: RecyclerView.ViewHolder) {
         val timeHolder = viewHolder as TimeViewHolder
         timeHolder.time.text = time
-        timeHolder.schedule.setOnClickListener(clicks)
+        timeHolder.schedule.setOnClickListener { clicks.invoke(isConflict) }
 
         val color = if (isConflict) {
             ContextCompat.getColor(viewHolder.itemView.context, R.color.buttonConflict)
