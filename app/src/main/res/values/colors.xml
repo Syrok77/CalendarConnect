@@ -2,6 +2,6 @@
 <resources>
     <color name="colorPrimary">#42a5f5</color>
     <color name="colorPrimaryDark">#0277bd</color>
-    <color name="colorAccent">#3949AB</color>
+    <color name="colorAccent">#0277bd</color>
     <color name="buttonConflict">#f44336</color>
 </resources>
