@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.calendar_fragment.tabs
 import kotlinx.android.synthetic.main.calendar_fragment.toolbar
 import kotlinx.android.synthetic.main.calendar_fragment.viewPager
+import org.providence.calendarconnect.extensions.startOfDay
+import java.util.Calendar
 
 class CalendarFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -27,8 +29,27 @@ class CalendarFragment : Fragment() {
 }
 
 class CalendarAdapter(fragmentManager: FragmentManager) : FragmentPagerAdapter(fragmentManager) {
+
+    private val cal = Calendar.getInstance()
+
+    init {
+        // Set the calendar to the start of the day
+        cal.startOfDay()
+    }
+
     override fun getItem(index: Int): Fragment {
-        return DayFragment()
+        val frag = DayFragment()
+
+        // Set date for fragment based on index
+        frag.date = if (index == 0) {
+            // Today
+            cal.time
+        } else {
+            // Tomorrow
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            cal.time
+        }
+        return frag
     }
 
     override fun getPageTitle(position: Int): CharSequence? {

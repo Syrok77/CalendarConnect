@@ -15,9 +15,17 @@ import android.widget.Toast
 import com.tomatron.RecyclerCell
 import com.tomatron.RecyclerCellAdapter
 import kotlinx.android.synthetic.main.day_fragment.recyclerView
+import org.providence.calendarconnect.provider.CalendarEvent
+import org.providence.calendarconnect.provider.CalendarEventsProvider
+import java.util.Date
 
 class DayFragment : Fragment() {
     private val adapter = RecyclerCellAdapter()
+
+    private lateinit var calendarEventsProvider: CalendarEventsProvider
+    private lateinit var calenderEvents: List<CalendarEvent>
+
+    lateinit var date: Date
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.day_fragment, container, false)
@@ -30,6 +38,10 @@ class DayFragment : Fragment() {
         recyclerView.adapter = adapter
 
         val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
+
+        // Get calendar events for today and tomorrow
+        calendarEventsProvider = CalendarEventsProvider(context!!)
+        calenderEvents = calendarEventsProvider.eventsForDay(date)
 
         // Set up data set
         adapter.cells = listOf(
