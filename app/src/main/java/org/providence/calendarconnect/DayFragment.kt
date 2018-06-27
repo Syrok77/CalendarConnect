@@ -80,7 +80,6 @@ class DayFragment : Fragment() {
         cal.set(Calendar.HOUR_OF_DAY, 10)
 
         while (cal.get(Calendar.HOUR_OF_DAY) < 20) {
-
             cells.add(TimeCell(
                 cal.timeInMillis,
                 calendarEventsProvider.eventsFor(cal.timeInMillis, 20),
