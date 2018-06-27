@@ -73,6 +73,7 @@ class DayFragment : Fragment() {
         }
 
         val cal = Calendar.getInstance()
+        val sdf = SimpleDateFormat("h:mm a")
         val cells = ArrayList<TimeCell>()
 
         // Create a list of appointments from 10am-8pm every 20min for [date], and check if we have cal conflicts
@@ -80,21 +81,24 @@ class DayFragment : Fragment() {
         cal.set(Calendar.HOUR_OF_DAY, 10)
 
         while (cal.get(Calendar.HOUR_OF_DAY) < 20) {
-            cells.add(TimeCell(cal.timeInMillis, calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+
+            cells.add(TimeCell(
+                cal.timeInMillis,
+                calendarEventsProvider.eventsFor(cal.timeInMillis, 20),
+                clicks))
             cal.timeInMillis += 20 * 60 * 1000
         }
-
-        // add 8pm slot
-        cells.add(TimeCell(cal.timeInMillis, calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+        // Add 8pm slot
+        cells.add(TimeCell(cal.timeInMillis, calendarEventsProvider.eventsFor(cal.timeInMillis, 20), clicks))
 
         return cells
     }
 }
 
 class TimeCell(private val time: Long,
-               private val isConflict: Boolean,
-               private val clicks: (Boolean, Long) -> Unit
-) : RecyclerCell() {
+               private val conflictEvents: List<CalendarEvent>,
+               private val clicks: (Boolean, Long) -> Unit) : RecyclerCell() {
+
     private val sdf = SimpleDateFormat("h:mm a", Locale.US)
 
     override fun createViewHolder(parent: ViewGroup, inflater: LayoutInflater): RecyclerView.ViewHolder {
@@ -103,6 +107,8 @@ class TimeCell(private val time: Long,
 
     override fun bindTo(viewHolder: RecyclerView.ViewHolder) {
         val timeHolder = viewHolder as TimeViewHolder
+        val isConflict = conflictEvents.isNotEmpty()
+
         timeHolder.time.text = sdf.format(time)
         timeHolder.schedule.setOnClickListener { clicks.invoke(isConflict, time) }
 
@@ -114,7 +120,11 @@ class TimeCell(private val time: Long,
         }
         timeHolder.schedule.backgroundTintList = ColorStateList.valueOf(color)
 
-        timeHolder.conflictMessage.visibility = if (isConflict) View.VISIBLE else View.GONE
+        timeHolder.conflictMessage.text = if (isConflict) {
+            conflictEvents.map { it.title }.joinToString(", ")
+        } else {
+            ""
+        }
     }
 
     class TimeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

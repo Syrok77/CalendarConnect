@@ -24,7 +24,7 @@ class CalendarEventsProvider constructor(private val context: Context) {
         val end = start + duration * 60 * 1000
 
         // Get calendar matches for events within [start] + [duration] AND where [start] + [duration] is contained within an event
-        val selection = "(${CalendarContract.Events.ALL_DAY} = 0 AND (${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} <= ?) OR (${CalendarContract.Events.DTEND} >= ? AND ${CalendarContract.Events.DTEND} <= ?) OR (${CalendarContract.Events.DTSTART} < ? AND ${CalendarContract.Events.DTEND} > ?))"
+        val selection = "(${CalendarContract.Events.ALL_DAY} = 0 AND (${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} < ?) OR (${CalendarContract.Events.DTEND} >= ? AND ${CalendarContract.Events.DTEND} <= ?) OR (${CalendarContract.Events.DTSTART} < ? AND ${CalendarContract.Events.DTEND} > ?))"
         val selectionArgs = arrayOf(start.toString(), end.toString(), start.toString(), end.toString(), start.toString(), end.toString())
         return parseEvents(selection, selectionArgs)
     }
