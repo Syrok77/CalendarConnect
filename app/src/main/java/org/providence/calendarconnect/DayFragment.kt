@@ -37,8 +37,6 @@ class DayFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
-
         // Get calendar events for today and tomorrow
         calendarEventsProvider = CalendarEventsProvider(context!!)
         calenderEvents = calendarEventsProvider.eventsForDay(date)
