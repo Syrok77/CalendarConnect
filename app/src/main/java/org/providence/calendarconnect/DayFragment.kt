@@ -1,9 +1,12 @@
 package org.providence.calendarconnect
 
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -11,16 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import com.tomatron.RecyclerCell
 import com.tomatron.RecyclerCellAdapter
 import kotlinx.android.synthetic.main.day_fragment.recyclerView
+import org.providence.calendarconnect.R.id.recyclerView
 import org.providence.calendarconnect.provider.CalendarEvent
 import org.providence.calendarconnect.provider.CalendarEventsProvider
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.TimeZone
+import java.util.Locale
 
 class DayFragment : Fragment() {
     private val adapter = RecyclerCellAdapter()
@@ -49,10 +52,30 @@ class DayFragment : Fragment() {
     }
 
     private fun timeList(): List<TimeCell> {
+        val clicks: (Boolean, Long) -> Unit = { isConflict, time ->
+            val activity = requireActivity() as CalendarActivity
+
+            if (isConflict) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("")
+                    .setMessage("This appointment conflicts with an event in your Calendar. Are you sure you want to schedule this appointment?")
+                    .setPositiveButton("Schedule") { _, _ ->
+                        activity.showConfirmation()
+                    }
+                    .setNegativeButton("View Calendar") { _, _ ->
+                        val intent = Intent(Intent.ACTION_VIEW)
+                            .setData(Uri.parse("content://com.android.calendar/time/$time"))
+                        activity.startActivity(intent)
+                    }
+                    .show()
+            } else {
+                activity.showConfirmation()
+            }
+        }
+
         val cal = Calendar.getInstance()
         val sdf = SimpleDateFormat("h:mm a")
         val cells = ArrayList<TimeCell>()
-        val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
 
         // Create a list of appointments from 10am-8pm every 20min for [date], and check if we have cal conflicts
         cal.time = date
@@ -61,21 +84,23 @@ class DayFragment : Fragment() {
         while (cal.get(Calendar.HOUR_OF_DAY) < 20) {
 
             cells.add(TimeCell(
-                sdf.format(cal.timeInMillis),
+                cal.timeInMillis,
                 calendarEventsProvider.eventsFor(cal.timeInMillis, 20),
                 clicks))
             cal.timeInMillis += 20 * 60 * 1000
         }
         // Add 8pm slot
-        cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.eventsFor(cal.timeInMillis, 20), clicks))
+        cells.add(TimeCell(cal.timeInMillis, calendarEventsProvider.eventsFor(cal.timeInMillis, 20), clicks))
 
         return cells
     }
 }
 
-class TimeCell(private val time: String,
+class TimeCell(private val time: Long,
                private val conflictEvents: List<CalendarEvent>,
-               private val clicks: (View) -> Unit) : RecyclerCell() {
+               private val clicks: (Boolean, Long) -> Unit) : RecyclerCell() {
+
+    private val sdf = SimpleDateFormat("h:mm a", Locale.US)
 
     override fun createViewHolder(parent: ViewGroup, inflater: LayoutInflater): RecyclerView.ViewHolder {
         return TimeViewHolder(inflater.inflate(R.layout.calendar_row, parent, false))
@@ -83,10 +108,12 @@ class TimeCell(private val time: String,
 
     override fun bindTo(viewHolder: RecyclerView.ViewHolder) {
         val timeHolder = viewHolder as TimeViewHolder
-        timeHolder.time.text = time
-        timeHolder.schedule.setOnClickListener(clicks)
+        val isConflict = conflictEvents.isNotEmpty()
 
-        val color = if (conflictEvents.isNotEmpty()) {
+        timeHolder.time.text = sdf.format(time)
+        timeHolder.schedule.setOnClickListener { clicks.invoke(isConflict, time) }
+
+        val color = if (isConflict) {
             ContextCompat.getColor(viewHolder.itemView.context, R.color.buttonConflict)
 
         } else {
@@ -94,7 +121,7 @@ class TimeCell(private val time: String,
         }
         timeHolder.schedule.backgroundTintList = ColorStateList.valueOf(color)
 
-        if (conflictEvents.isNotEmpty()) {
+        if (isConflict) {
             timeHolder.conflictMessage.text = conflictEvents.map { it.title }.joinToString(", ")
         }
     }

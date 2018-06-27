@@ -14,6 +14,12 @@ import org.providence.calendarconnect.extensions.startOfDay
 import java.util.Calendar
 
 class CalendarFragment : Fragment() {
+     private lateinit var adapter: CalendarAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        adapter = CalendarAdapter(childFragmentManager)
+    }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.calendar_fragment, container, false)
     }
@@ -23,7 +29,7 @@ class CalendarFragment : Fragment() {
 
         toolbar.title = "Calendar Connect"
 
-        viewPager.adapter = CalendarAdapter(fragmentManager!!)
+        viewPager.adapter = adapter
         tabs.setupWithViewPager(viewPager)
     }
 }
