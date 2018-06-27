@@ -40,7 +40,7 @@ class DayFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        // Get calendar events for today and tomorrow
+        // Get calendar events for [date]
         calendarEventsProvider = CalendarEventsProvider(context!!)
         calenderEvents = calendarEventsProvider.eventsForDay(date)
 
@@ -63,6 +63,9 @@ class DayFragment : Fragment() {
             cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
             cal.timeInMillis += 20 * 60 * 1000
         }
+        // add 8pm slot
+        cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+
         return cells
     }
 }
