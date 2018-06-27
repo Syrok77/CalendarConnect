@@ -73,7 +73,6 @@ class DayFragment : Fragment() {
         }
 
         val cal = Calendar.getInstance()
-        val sdf = SimpleDateFormat("h:mm a")
         val cells = ArrayList<TimeCell>()
 
         // Create a list of appointments from 10am-8pm every 20min for [date], and check if we have cal conflicts
