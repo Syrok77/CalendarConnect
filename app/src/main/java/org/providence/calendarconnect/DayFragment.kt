@@ -17,7 +17,10 @@ import com.tomatron.RecyclerCellAdapter
 import kotlinx.android.synthetic.main.day_fragment.recyclerView
 import org.providence.calendarconnect.provider.CalendarEvent
 import org.providence.calendarconnect.provider.CalendarEventsProvider
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 
 class DayFragment : Fragment() {
     private val adapter = RecyclerCellAdapter()
@@ -37,8 +40,6 @@ class DayFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
-        val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
-
         // Get calendar events for today and tomorrow
         calendarEventsProvider = CalendarEventsProvider(context!!)
         calenderEvents = calendarEventsProvider.eventsForDay(date)
@@ -48,31 +49,21 @@ class DayFragment : Fragment() {
     }
 
     private fun timeList(): List<TimeCell> {
+        val cal = Calendar.getInstance()
+        val sdf = SimpleDateFormat("h:mm a")
+        val cells = ArrayList<TimeCell>()
         val clicks = { _: View -> Toast.makeText(context, "wow", Toast.LENGTH_SHORT).show() }
 
-        return listOf(
-            TimeCell("10:00 AM", false, clicks),
-            TimeCell("10:20 PM", false, clicks),
-            TimeCell("10:40 PM", true, clicks),
-            TimeCell("11:00 AM", false, clicks),
-            TimeCell("11:20 AM", false, clicks),
-            TimeCell("11:40 AM", false, clicks),
-            TimeCell("12:00 PM", false, clicks),
-            TimeCell("12:20 PM", false, clicks),
-            TimeCell("12:40 PM", false, clicks),
-            TimeCell("1:00 PM", true, clicks),
-            TimeCell("1:20 PM", true, clicks),
-            TimeCell("1:40 PM", true, clicks),
-            TimeCell("2:20 PM", true, clicks),
-            TimeCell("2:40 PM", true, clicks),
-            TimeCell("3:00 PM", false, clicks),
-            TimeCell("4:00 PM", false, clicks),
-            TimeCell("4:20 PM", false, clicks),
-            TimeCell("4:40 PM", false, clicks),
-            TimeCell("5:00 PM", false, clicks),
-            TimeCell("5:20 PM", false, clicks),
-            TimeCell("5:40 PM", false, clicks)
-        )
+        // Create a list of appointments from 10am-8pm every 20min for [date], and check if we have cal conflicts
+        cal.time = date
+        cal.set(Calendar.HOUR_OF_DAY, 10)
+
+        while (cal.get(Calendar.HOUR_OF_DAY) < 20) {
+
+            cells.add(TimeCell(sdf.format(cal.timeInMillis), calendarEventsProvider.hasEventsFor(cal.timeInMillis, 20), clicks))
+            cal.timeInMillis += 20 * 60 * 1000
+        }
+        return cells
     }
 }
 
